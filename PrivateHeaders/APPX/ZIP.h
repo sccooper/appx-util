@@ -193,6 +193,14 @@ namespace appx {
             std::equal(suffix.rbegin(), suffix.rend(), inputFileName.rbegin()));
     }
 
+    inline bool _IsMSIXFile(const std::string &inputFileName)
+    {
+        const std::string suffix = ".msix";
+        return (
+            suffix.size() < inputFileName.size() &&
+            std::equal(suffix.rbegin(), suffix.rend(), inputFileName.rbegin()));
+    }
+
     // For each of the appx files that we store in appxbundle, there is a
     // corresponding
     //   entry in AppxBundleManifest.xml. This entry (an XML node) contains the
@@ -382,7 +390,7 @@ namespace appx {
            << "xmlns=\"http://schemas.microsoft.com/appx/2010/blockmap\" "
            << "HashMethod=\"http://www.w3.org/2001/04/xmlenc#sha256\">";
         for (const ZIPFileEntry &entry : otherEntries) {
-            if (isBundle && _IsAPPXFile(entry.fileName)) {
+            if (isBundle && (_IsAPPXFile(entry.fileName) || _IsMSIXFile(entry.fileName))) {
                 continue;
             }
             std::string fixedFileName = entry.fileName;
@@ -465,7 +473,7 @@ namespace appx {
         std::vector<ZIPBlock> blocks;
         ZIPCompressionType compressionType;
         {
-            if (_IsAPPXFile(archiveFileName)) {
+            if (_IsAPPXFile(archiveFileName) || _IsMSIXFile(archiveFileName)) {
                 compressionLevel = Z_NO_COMPRESSION;
             }
 
