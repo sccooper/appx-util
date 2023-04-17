@@ -95,6 +95,7 @@ namespace appx {
         auto zipSink = MakeMultiSink(zipRawSink, zipOffsetSink);
         std::vector<ZIPFileEntry> zipFileEntries;
         std::pair<std::string, std::string> appxBundleManifest;
+        std::pair<std::string, std::string> appxManifest;
 
         APPXDigests digests;
 
@@ -114,9 +115,20 @@ namespace appx {
                     continue;
                 }
 
+                if (archiveName == "AppxManifest.xml") {
+                    appxManifest = fileNamePair;
+                    continue;
+                }
+
                 zipFileEntries.emplace_back(
                     WriteZIPFileEntry(sink, zipOffsetSink.Offset(), fileName,
                                       archiveName, compressionLevel));
+            }
+
+            if (!appxManifest.first.empty()) {
+                zipFileEntries.emplace_back(
+                    WriteZIPFileEntry(sink, zipOffsetSink.Offset(), appxManifest.second,
+                                      appxManifest.first, compressionLevel));
             }
 
             if (isBundle) {
